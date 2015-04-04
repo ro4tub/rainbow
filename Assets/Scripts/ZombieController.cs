@@ -1,13 +1,26 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+
+
 public class ZombieController : MonoBehaviour {
 	public float moveSpeed;
 	public float turnSpeed;
 	private Vector3 moveDirection;
+	enum CONTROL_STATE {
+		STATE_NOT_IN_CONTROL = 1, // not control
+		STATE_IN_CONTROL = 2, // control by touch
+	}
+	private CONTROL_STATE state = CONTROL_STATE.STATE_NOT_IN_CONTROL;
+	private Vector3 lastTouchPos;
+
+
+
+
 	// Use this for initialization
 	void Start () {
 		moveDirection = Vector3.right;
+		Debug.LogFormat ("touchSupported={0}, simulateMouseWithTouches={1}\n", Input.touchSupported, Input.simulateMouseWithTouches);
 	}
 	
 	// Update is called once per frame
@@ -15,12 +28,16 @@ public class ZombieController : MonoBehaviour {
 		// 1
 		Vector3 currentPosition = transform.position;
 		// 2
-		if( Input.GetButton("Fire1") ) {
-			// 3
-			Vector3 moveToward = Camera.main.ScreenToWorldPoint( Input.mousePosition );
-			// 4
-			moveDirection = moveToward - currentPosition;
+		if (state == CONTROL_STATE.STATE_IN_CONTROL && Input.GetMouseButton (0) == true) {
+			Vector3 curTouchPos = Camera.main.ScreenToWorldPoint( Input.mousePosition );
+			moveDirection = curTouchPos - lastTouchPos;
 			moveDirection.z = 0; 
+			moveDirection.Normalize();
+		} else if(state == CONTROL_STATE.STATE_NOT_IN_CONTROL) {
+			// not controlled state, forward
+			moveDirection.x = 1;
+			moveDirection.y = 0;
+			moveDirection.z = 0;
 			moveDirection.Normalize();
 		}
 		Vector3 target = moveDirection * moveSpeed + currentPosition;
@@ -32,7 +49,16 @@ public class ZombieController : MonoBehaviour {
 			                 Quaternion.Euler( 0, 0, targetAngle ), 
 			                 turnSpeed * Time.deltaTime );
 
-		EnforceBounds ();
+		if (Input.GetMouseButtonDown (0)) {
+			Debug.Log ("touch began");
+			state = CONTROL_STATE.STATE_IN_CONTROL;
+			lastTouchPos = Camera.main.ScreenToWorldPoint( Input.mousePosition );
+		} else if (Input.GetMouseButtonUp (0)) {
+			Debug.Log ("touch ended");
+			state = CONTROL_STATE.STATE_NOT_IN_CONTROL;
+		}
+
+//		EnforceBounds ();
 	}
 	
 	private void EnforceBounds() {

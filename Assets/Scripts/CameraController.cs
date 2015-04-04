@@ -2,16 +2,23 @@
 using System.Collections;
 
 public class CameraController : MonoBehaviour {
-	public float speed = 1f;
 	private Vector3 newPosition;
+	private Transform player;
 	// Use this for initialization
 	void Start () {
-		newPosition = transform.position;
+		GameObject obj = GameObject.FindGameObjectWithTag ("Player");
+		if (obj != null) {
+			player = obj.transform;
+			newPosition = player.position;
+			newPosition.z = transform.position.z;
+			transform.position = newPosition;
+		}
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		newPosition.x += Time.deltaTime * speed;
+		newPosition = player.position;
+		newPosition.z = transform.position.z;
 		transform.position = newPosition;
 	}
 }
