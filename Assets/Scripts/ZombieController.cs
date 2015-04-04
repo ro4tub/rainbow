@@ -76,4 +76,8 @@ public class ZombieController : MonoBehaviour {
 		}
 		transform.position = newPosition;
 	}
+
+	void OnTriggerEnter2D( Collider2D other ) {
+		Debug.Log ("Hit " + other.gameObject);
+	}
 }
