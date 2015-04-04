@@ -11,7 +11,13 @@ public class ZombieController : MonoBehaviour {
 		STATE_NOT_IN_CONTROL = 1, // not control
 		STATE_IN_CONTROL = 2, // control by touch
 	}
+	enum GAME_STATE {
+		GAME_STATE_IDLE = 1,
+		GAME_STATE_PAUSE = 2,
+		GAME_STATE_OVER = 3,
+	}
 	private CONTROL_STATE state = CONTROL_STATE.STATE_NOT_IN_CONTROL;
+	private GAME_STATE gameState = GAME_STATE.GAME_STATE_IDLE;
 	private Vector3 lastTouchPos;
 
 
@@ -25,6 +31,9 @@ public class ZombieController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		if (gameState != GAME_STATE.GAME_STATE_IDLE)
+			return;
+
 		// 1
 		Vector3 currentPosition = transform.position;
 		// 2
@@ -79,5 +88,14 @@ public class ZombieController : MonoBehaviour {
 
 	void OnTriggerEnter2D( Collider2D other ) {
 		Debug.Log ("Hit " + other.gameObject);
+
+		GameObject gameEndUI = Resources.Load ("GameEndUI") as GameObject;
+		if (gameEndUI == null) {
+			Debug.LogError ("not found GameEndUI prefab");
+			return;
+		}
+		gameState = GAME_STATE.GAME_STATE_OVER;
+//		Time.timeScale = 0; // FIXME !!! important !!!
+		Instantiate(gameEndUI);
 	}
 }
